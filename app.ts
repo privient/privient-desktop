@@ -24,7 +24,7 @@ export class MainProcess {
     if (this.WinMain !== undefined)
       return;
 
-    this.WinMain = new BrowserWindow({ width: 800, height: 600, autoHideMenuBar: true, webPreferences: { nodeIntegration: true } });
+    this.WinMain = new BrowserWindow({ minWidth:800, width: 800, frame: false, height: 600, minHeight: 600, fullscreenable: true, autoHideMenuBar: true, webPreferences: { nodeIntegration: true } });
     this.WinMain.loadURL(defaultPage);
     this.WinMain.on('closed', () => {
       this.WinMain = null;
@@ -80,6 +80,23 @@ export class MainProcess {
       } else {
         this.CryptoService = CryptoService.GetInstance(arg.password);
       }
+    });
+
+    ipcMain.on('restore-app', (event, arg) => {
+      this.WinMain.setMaximizable(true);
+      if (!this.WinMain.isMaximized()) {
+        this.WinMain.maximize();
+      } else {
+        this.WinMain.unmaximize();
+      }
+    });
+
+    ipcMain.on('close-app', (event, arg) => {
+      this.WinMain.close();
+    });
+
+    ipcMain.on('minimize-app', (event, arg) => {
+      this.WinMain.minimize();
     });
   }
 }

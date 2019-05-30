@@ -1,1 +1,136 @@
 /* You can add global styles to this file, and also import other style files */
+$bg-main: #2C2F33
+$bg-off: #23272A
+$acc-main: #FFC107
+$acc-main-off: #FF9800
+$acc-exit: #dd2c00
+
+body, html
+  margin: 0
+  padding: 0
+
+.flex-grid
+  display: flex
+  background-color: $bg-off
+  min-height: 8vh
+  max-height: 8vh
+  
+.flex-center
+  align-items: center
+  
+.align-right
+  justify-content: right
+  text-align: right
+  
+.align-center
+  justify-content: center
+  text-align: center
+  
+.col-1
+  flex: 1
+  
+.col-1-5
+  flex: 1.5
+  
+.col-2
+  flex: 2
+  
+.col-3
+  flex: 3
+
+.col-4
+  flex: 4
+ 
+.col-5
+  flex: 5
+  
+.col-6
+  flex: 6
+  
+.col-7
+  flex: 7
+  
+.col-8
+  flex: 8
+  
+.expand-view
+  min-height: 92vh
+  
+.main-content
+  background-color: $bg-main
+  
+.app-title
+  color: $acc-main
+  font-family: 'Helvetica'
+  font-weight: bold
+  letter-spacing: 5px
+  padding-left: 3vh
+  -webkit-user-select: none
+  
+.app-title-bar
+  -webkit-app-region: drag
+  -webkit-user-select: none
+  
+.app-button
+  -webkit-user-select: none
+  -webkit-app-region: no-drag
+  padding: 1.5vh
+  background-color: transparent
+  border: none
+  color: white
+  font-weight: bold
+  cursor: pointer
+
+.app-button:focus
+  outline: 0
+  
+.app-button:hover
+  color: $acc-main
+  font-weight: bold
+    
+.menu
+  list-style-type: none
+  padding: 0
+  margin: 0
+  border-bottom: 1px solid
+  border-color: rgba(255, 255, 255, 0.2)
+
+.menu li button
+  min-width: 100%
+  min-height: 100%
+  padding-left: 3vh
+  padding-top: 2vh
+  padding-bottom: 2vh
+  text-align: left
+  text-decoration: none
+  font-family: 'Lato'
+  font-size: 13px
+  background-color: transparent
+  color: white
+  border-top: 1px solid rgba(255, 255, 255, 0.2)
+  border-right: none
+  border-left: none
+  border-bottom: none
+  -webkit-user-select: none
+  transition: 1s
+  
+.menu li button:hover
+  color: $acc-main
+  cursor: pointer
+  box-shadow: inset 15em 0 0 0.01px rgba(255, 255, 255, 0.2)
+  -webkit-animation: glow 1s ease-in-out infinite alternate
+  
+.menu li button:focus
+  outline: none
+  box-shadow: inset 15em 0 0 0.01px rgba(255, 255, 255, 0.2)
+  color: $acc-main
+  
+@-webkit-keyframes glow
+  from
+    text-shadow: 0 0 5px $acc-main
+  to
+    text-shadow: 0 0 15px $acc-main-off
+
+.connection-status
+    padding-left: 3vh
+    color: white

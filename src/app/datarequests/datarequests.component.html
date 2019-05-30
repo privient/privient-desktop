@@ -1,0 +1,8 @@
+<p>Data Requests:</p>
+<ul>
+    <li *ngFor="let request of requests">
+        <p>{{ request }}</p>
+        <button (click)="DataRequestAction($event, request, true)">Accept</button>
+        <button (click)="DataRequestAction($event, request, false)">Decline</button>
+    </li>
+</ul>

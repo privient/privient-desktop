@@ -1,18 +1,61 @@
 <!--The content below is only a placeholder and can be replaced.-->
+<div class="flex-grid flex-center app-title-bar">
+    <div class="col-8">
+        <span class="app-title">PRIVIENT</span>
+        <span class="connection-status">{{ connection }}</span>
+    </div>
+    <div class="col-2 align-right">
+        <button class="app-button" (click)="minimizeApp($event);">-</button>
+        <button class="app-button" (click)="restoreApp($event);">[&nbsp;&nbsp;]</button>
+        <button class="app-button" (click)="closeApp($event);">X</button>
+    </div>
+</div>
+<!-- Locked Wallet Page -->
+<div *ngIf="locked">
+    <div class="flex-grid expand-view main-content">
+        <div class="col-8 align-center">
+            <form [formGroup]="passwordRequest" (ngSubmit)="SubmitPassword()">
+                <fieldset>
+                    <legend>Unlock Wallet</legend>
+                    <div>
+                        <label>Password</label>
+                        <input placeholder="Password" type="password" formControlName="password">
+                        <button type="submit">Submit</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Main Wallet Page -->
+<div *ngIf="!locked">
+    <div class="flex-grid expand-view">
+        <div class="col-1-5 ">
+            <ul class="menu">
+                <li><button href="#" (click)="route($event, 'data');">Data</button></li>
+                <li><button href="#" (click)="route($event, 'requests');">Requests</button></li>
+                <li><button href="#" (click)="route($event, 'backup');">Backup</button></li>
+                <li><button href="#" (click)="route($event, 'about');">About</button></li>
+                <li><button href="#" (click)="route($event, 'settings');">Settings</button></li>
+            </ul>
+        </div>
+        <div class="col-8 main-content">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- 
 <div *ngIf="!locked">
     <p>Connected: {{ connection }}</p>
 
-    <ul>
-        <li *ngFor="let request of requests">
-            <p>{{ request }}</p>
-            <button (click)="DataRequestAction($event, request, true)">Accept</button>
-            <button (click)="DataRequestAction($event, request, false)">Decline</button>
-        </li>
-    </ul>
+    
 </div>
 <div *ngIf="locked">
     <button (click)="UnlockWallet($event, 'abc123')">Unlock</button>
 </div>
 
+-->
 
-<router-outlet></router-outlet>

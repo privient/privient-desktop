@@ -2,6 +2,7 @@ import * as WebSocket from 'ws';
 import { MainProcess } from '../app';
 import { CryptoService } from './CryptoService';
 import { DataService } from './DataService';
+import * as Notifier from 'node-notifier'
 
 /*
 Simple Transaction:
@@ -77,10 +78,21 @@ export class SocketService {
         } catch(err) {
             result = msg;
         }
-        
+
         if (result.route === undefined || result.data === undefined) {
             ws.send(JSON.stringify({ success: false, message: 'Failed to parse json data.'}));
             return;
+        }
+
+        if (!ValidRouteRequests.includes(result.route)) {
+            ws.send(JSON.stringify({ success: false, message: 'That is not a valid route.'}));
+            return;
+        }
+
+        if (result.route == 'request-data') {
+            console.log('testabc')
+            
+            Notifier.notify({ title: 'Privient', message: `${result.data.appname} is requesting data.`});
         }
 
         if (result.display !== undefined && result.display) {
@@ -96,7 +108,7 @@ export class SocketService {
             if (CryptoService.Status) {
                 this.SaveData(result.data.appname, result.data);
             } else {
-                
+
             }
         }
     }

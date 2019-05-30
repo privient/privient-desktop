@@ -1,6 +1,8 @@
 import { Component, ChangeDetectorRef, ChangeDetectionStrategy, OnInit, Input } from '@angular/core';
 import { ElectronService } from './providers/electron.service';
 import { IpcMessageEvent } from 'electron';
+import { Router } from '@angular/router'
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -8,17 +10,29 @@ import { IpcMessageEvent } from 'electron';
   styleUrls: ['./app.component.sass']
 })
 export class AppComponent {
+  // Forms:
+  passwordRequest: FormGroup;
+  newPasswordRequest: FormGroup;
+  
+  // From States
+  passwordRequestSubmitted: boolean = false;
+
+
+  // Wallet States
   locked: boolean = true;
   connection: boolean = false;
-  newRequest: boolean = false;
   audioState: boolean = true;
+
+  // Wallet Data
   title: string = 'Privient Desktop';
 
-  requests: Array<any> = [];
-
-  constructor(public es: ElectronService, public cdr: ChangeDetectorRef) {
+  constructor(public es: ElectronService, public cdr: ChangeDetectorRef, public router: Router, private formBuilder: FormBuilder) {
+    // Forms
+    this.passwordRequest = this.formBuilder.group({
+      password: ['', Validators.required]
+    })
+    
     es.ipcRenderer.on('connection-status', (event, arg) => { this.setConnectionState(event, arg); });
-    es.ipcRenderer.on('request-data', (event, arg) => { this.requestData(cdr, event, arg); });
     es.ipcRenderer.on('lock-wallet', (event, arg) => { this.lockWallet(event, arg); });
   }
 
@@ -39,25 +53,14 @@ export class AppComponent {
     console.log(arg);
   }
 
-  private requestData(detector: ChangeDetectorRef, event: IpcMessageEvent, arg: any) {
-    this.newRequest = true;
-
-    if (this.audioState) {
-      var audio = new Audio('./assets/notify.ogg');
-      audio.play();
-    }
-
-    this.requests.push(JSON.stringify(arg));
-    this.cdr.detectChanges();
-    console.log(arg);
-  }
-
   lockWallet(event: IpcMessageEvent, arg: any) {
     this.locked = arg;
     this.cdr.detectChanges();
   }
 
+  
   DataRequestAction(event: any, info: string, accept: boolean) {
+    /*
     var result = this.requests.indexOf(info);
 
     if (result == -1) {
@@ -72,9 +75,43 @@ export class AppComponent {
 
     console.log('accepted');
     this.es.ipcRenderer.send('accept-request', acceptedRequest);
+    */
   }
-  
-  UnlockWallet(event: any, pass: string) {
-    this.es.ipcRenderer.send('unlock-wallet', { result: false, password: pass });
+
+  // Application Router
+  route(event: any, location: string) {
+    this.router.navigateByUrl("/" + location);
+  }
+
+  // Application Actions
+  closeApp(event: any) {
+    this.es.ipcRenderer.send('close-app');
+  }
+
+  minimizeApp(event: any) {
+    this.es.ipcRenderer.send('minimize-app');
+  }
+
+  restoreApp(event: any) {
+    this.es.ipcRenderer.send('restore-app');
+  }
+
+  // Application From Actions
+  SubmitPassword() {
+    this.passwordRequestSubmitted = true;
+    
+    if (!this.passwordRequest.valid) {
+      this.passwordRequestSubmitted = false;
+      return;
+    }
+
+    let password = this.passwordRequest.value;
+
+    if (password == undefined || password == null) {
+      this.passwordRequestSubmitted = false;
+      return;
+    }
+
+    this.es.ipcRenderer.send('unlock-wallet', { result: false, password: password });
   }
 }
