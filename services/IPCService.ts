@@ -3,19 +3,21 @@ import { CryptoService } from './CryptoService';
 import { MainProcess } from '../app';
 import { SocketService } from './SocketService';
 import { RequestService } from './RequestService';
+import { DataService } from './DataService';
 
 export namespace IPCService {
     export function StartIPCService() {
         ipcMain.on('unlock-wallet', (event, arg) => {
             if (arg.result) {
-                CryptoService.KillInstance();
+                CryptoService.GetInstance().KillInstance();
             } else {
+                console.log(arg);
                 CryptoService.GetInstance().SetupInstance(arg.password);
             }
         });
         
         ipcMain.on('restore-app', (event, arg) => {
-            var main = MainProcess.GetInstance();
+            let main = MainProcess.GetInstance();
             main.WinMain.setMaximizable(true);
         
             main.WinMain.setMaximizable(true);
@@ -37,36 +39,63 @@ export namespace IPCService {
         // Retrieve all the data requests that are currently in queue.
         // This is required store states for data requests.
         ipcMain.on('pull-data-requests', () => {
-            var transactions = RequestService.GetInstance().Requests;
+            let transactions = RequestService.GetInstance().Requests;
             MainProcess.GetInstance().WindowSend('request-data', transactions);
         });
         
-          // Accept an existing data request.
+        // Accept an existing data request.
         ipcMain.on('accept-data-request', (event, id) => {
-            var requestService = RequestService.GetInstance();
+            let requestService = RequestService.GetInstance();
             
-            var result = requestService.Requests.find(x => x.id == id)
+            let result = requestService.Requests.find(x => x.id == id)
             
             if (result == undefined || result == null) {
                 requestService.UpdateRequests();
                 return;
             }
             
-            var wasRemoved = requestService.RemoveRequest(id);
+            let wasRemoved = requestService.RemoveRequest(id);
 
             if (!wasRemoved) {
                 requestService.UpdateRequests();
                 return;
             }
 
-            console.log('Ready to retrieve data for:');
-            console.log(result);
+            let promiseData = DataService.GetDataByAppName(result.data.appname);
+
+            promiseData.then(
+                (data) => {
+                    let decrypt = CryptoService.GetInstance().DecryptBySession(data);
+                    if (decrypt == undefined) {
+                        console.log('failed to decrypt');
+                        return;
+                    }
+                    
+                    console.log(result);
+                    SocketService.GetInstance().SendSocketMessage({ route: 'use-data', data: result });
+                },
+                (error) => {
+                    console.log(error);
+                    SocketService.GetInstance().SendSocketMessage({ route: 'no-data' });
+                    return;
+                }
+            );
+
+            
         });
         
           // Decline an existing data request.
         ipcMain.on('decline-data-request', (event, id) => {
-            var wasRemoved = RequestService.GetInstance().RemoveRequest(id);
-            console.log(wasRemoved);
+            let wasRemoved = RequestService.GetInstance().RemoveRequest(id);
+
+            if (!wasRemoved)
+                return;
+
+            SocketService.GetInstance().SendSocketMessage({ route: 'declined' });
+        });
+
+        ipcMain.on('lock-wallet', (event) => {
+            CryptoService.GetInstance().KillInstance();
         });
     }
 }

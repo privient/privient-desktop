@@ -2,8 +2,8 @@ import * as WebSocket from 'ws';
 import { MainProcess } from '../app';
 import { CryptoService } from './CryptoService';
 import { DataService } from './DataService';
-import * as Notifier from 'node-notifier'
 import { RequestService } from './RequestService';
+import { SocketEventsService } from './SocketEventsService';
 
 /*
 Simple Transaction:
@@ -53,13 +53,7 @@ export class SocketService {
 
     StartSocketService() {
         this.Socket.setMaxListeners(1);
-
         this.Socket.on('connection', (ws: any) => {
-            if (ws._socket.remoteAddress !== "::1") {
-                ws.close();
-                return;
-            }
-
             MainProcess.GetInstance().WindowSend('connection-status', true);
 
             ws.on('close', () => {
@@ -71,8 +65,13 @@ export class SocketService {
         });
     }
 
+    SendSocketMessage(msg) {
+        this.Socket.clients.forEach((ws) => {
+            ws.send(JSON.stringify(msg));
+        });
+    }
+
     private HandleSocketMessage(ws, msg) {
-        // Parse Data
         var result: any;
 
         try {
@@ -86,35 +85,20 @@ export class SocketService {
             return;
         }
 
-        if (!ValidRouteRequests.includes(result.route)) {
-            ws.send(JSON.stringify({ success: false, message: 'That is not a valid route.'}));
-            return;
-        }
-
-        // Increase data id for each transaction recieved.
+        // Append an id to this message.
         dataId += 1;
         result['id'] = dataId;
 
-        if (result.route == 'request-data') {
-            Notifier.notify({ title: 'Privient', message: `${result.data.appname} is requesting data.`});
-            RequestService.GetInstance().PushRequest(result);
-        }
-        
-        if (HaltRouteRequests.includes(result.route)) {
+        // request-data
+        if (result.route === 'request-data') {
+            SocketEventsService.RequestData(result);
             return;
         }
 
-        // Rest of cases go here:
+        // save-data
         if (result.route === 'save-data') {
-            if (CryptoService.GetInstance().Status) {
-                this.SaveData(result.data.appname, result.data);
-            } else {
-
-            }
+            SocketEventsService.SaveData(result);
+            return;
         }
-    }
-
-    private SaveData(appName: string, data: any) {
-        DataService.SetDataByAppName(appName, data);
     }
 }

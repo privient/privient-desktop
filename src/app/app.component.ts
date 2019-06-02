@@ -58,26 +58,6 @@ export class AppComponent {
     this.cdr.detectChanges();
   }
 
-  
-  DataRequestAction(event: any, info: string, accept: boolean) {
-    /*
-    var result = this.requests.indexOf(info);
-
-    if (result == -1) {
-      return;
-    }
-
-    var acceptedRequest = this.requests.splice(result, 1);
-    this.cdr.detectChanges();
-
-    if (!accept)
-      return;
-
-    console.log('accepted');
-    this.es.ipcRenderer.send('accept-request', acceptedRequest);
-    */
-  }
-
   // Application Router
   route(event: any, location: string) {
     this.router.navigateByUrl("/" + location);
@@ -94,6 +74,10 @@ export class AppComponent {
 
   restoreApp(event: any) {
     this.es.ipcRenderer.send('restore-app');
+  }
+
+  forceLock(event: any) {
+    this.es.ipcRenderer.send('lock-wallet');
   }
 
   // Application From Actions
