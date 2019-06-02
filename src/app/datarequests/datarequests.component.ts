@@ -11,21 +11,33 @@ export class DatarequestsComponent implements OnInit {
   newRequest: boolean = false;
   audioState: boolean = true;
 
-  constructor(public es: ElectronService, public cdr: ChangeDetectorRef) { 
-    es.ipcRenderer.on('request-data', (event, arg) => { this.requestData(event, arg); });
+  constructor(public es: ElectronService, public cdr: ChangeDetectorRef) {
+    this.requests = [];
+    this.ipcEvents();
+    this.es.ipcRenderer.send('pull-data-requests');
+  }
+
+  private ipcEvents() {
+    this.es.ipcRenderer.on('request-data', (event, arg) => { this.requestData(event, arg); });
   }
 
   private requestData(event: any, arg: any) {
+    this.requests = arg as Array<any>;
     this.newRequest = true;
+    this.CheckForChanges();
+  }
 
-    if (this.audioState) {
-      var audio = new Audio('./assets/notify.ogg');
-      audio.play();
+  DataRequestAction(event: any, request: any, accept: boolean) {
+    if (accept)
+      this.es.ipcRenderer.send('accept-data-request', request.id);
+    else
+      this.es.ipcRenderer.send('decline-data-request', request.id);
+  }
+
+  private CheckForChanges() {
+    if (!this.cdr['destroyed']) {
+      this.cdr.detectChanges();
     }
-
-    this.requests.push(JSON.stringify(arg));
-    this.cdr.detectChanges();
-    console.log(arg);
   }
 
   ngOnInit() {

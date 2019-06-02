@@ -37,7 +37,7 @@ export class DataService {
                     return reject('Not found.');
                 }
 
-                CryptoService.Decrypt(store.get(appName)).then(
+                CryptoService.GetInstance().Decrypt(store.get(appName)).then(
                     (res) => {
                         return resolve(res);
                     },
@@ -51,7 +51,7 @@ export class DataService {
     }
 
     static SetDataByAppName(appName: string, data: any) {
-        CryptoService.Encrypt(data).then((res) => {
+        CryptoService.GetInstance().Encrypt(data).then((res) => {
             store.set(appName, res);
         });
     }

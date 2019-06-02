@@ -26,7 +26,7 @@ export class AppComponent {
   // Wallet Data
   title: string = 'Privient Desktop';
 
-  constructor(public es: ElectronService, public cdr: ChangeDetectorRef, public router: Router, private formBuilder: FormBuilder) {
+  constructor(public es: ElectronService, public cdr: ChangeDetectorRef, private router: Router, private formBuilder: FormBuilder) {
     // Forms
     this.passwordRequest = this.formBuilder.group({
       password: ['', Validators.required]

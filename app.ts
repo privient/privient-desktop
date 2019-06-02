@@ -4,6 +4,7 @@ import { CryptoService } from './services/CryptoService';
 import * as path from 'path';
 import * as url from 'url';
 import { DataService } from './services/DataService';
+import { IPCService } from './services/IPCService';
 
 const defaultPage = url.format({
   pathname: path.join(__dirname, `./index.html`),
@@ -14,13 +15,13 @@ const defaultPage = url.format({
 // Singleton
 export class MainProcess {
   private static Instance: MainProcess;
-  private static WinMain: BrowserWindow;
-  private static SocketService: SocketService;
-  private static CryptoService: CryptoService;
+  WinMain: BrowserWindow;
+  private SocketService: SocketService;
+  private CryptoService: CryptoService;
 
   private constructor() { }
 
-  static CreateWindow() {
+  CreateWindow() {
     if (this.WinMain !== undefined)
       return;
 
@@ -31,10 +32,9 @@ export class MainProcess {
     })
     
     this.WinMain.webContents.openDevTools();
-    this.IPCEvents();
   }
 
-  static GetWindow(): BrowserWindow {
+  GetWindow(): BrowserWindow {
     if (this.WinMain === undefined)
       this.CreateWindow();
 
@@ -44,65 +44,39 @@ export class MainProcess {
   static GetInstance(): MainProcess {
     if (this.Instance === undefined) {
       this.Instance = new MainProcess();
-      this.SocketService = SocketService.GetInstance();
-      this.WindowSend('lock-wallet', true);
-      this.CreateWindow();
+      this.Instance.SocketService = SocketService.GetInstance();
+      this.Instance.WindowSend('lock-wallet', true);
+      this.Instance.CreateWindow();
+      IPCService.StartIPCService();
     }
       
     return this.Instance;
   }
 
-  public static WindowSend(route: string, args: any) {
+  WindowSend(route: string, args: any) {
     if (this.WinMain === undefined)
       return;
     
     this.WinMain.webContents.send(route, args);
   }
 
-  static HideWindow() {
+  HideWindow() {
     if (this.WinMain === undefined)
       return;
 
     this.WinMain.hide();
   }
 
-  static ShowWindow() {
+  ShowWindow() {
     if (this.WinMain === undefined)
       return;
 
     this.WinMain.show();
   }
-
-  private static IPCEvents() {
-    ipcMain.on('unlock-wallet', (event, arg) => {
-      if (arg.result) {
-        CryptoService.KillInstance();
-      } else {
-        this.CryptoService = CryptoService.GetInstance(arg.password);
-      }
-    });
-
-    ipcMain.on('restore-app', (event, arg) => {
-      this.WinMain.setMaximizable(true);
-      if (!this.WinMain.isMaximized()) {
-        this.WinMain.maximize();
-      } else {
-        this.WinMain.unmaximize();
-      }
-    });
-
-    ipcMain.on('close-app', (event, arg) => {
-      this.WinMain.close();
-    });
-
-    ipcMain.on('minimize-app', (event, arg) => {
-      this.WinMain.minimize();
-    });
-  }
 }
 
 app.on('ready', () => { MainProcess.GetInstance(); });
-app.on('activate', () => { MainProcess.GetWindow(); });
+app.on('activate', () => { MainProcess.GetInstance().GetWindow(); });
 app.on('window-all-closed', () => {
   if (process.platform !== "darwin") {
     app.quit();

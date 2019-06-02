@@ -3,6 +3,7 @@ import { MainProcess } from '../app';
 import { CryptoService } from './CryptoService';
 import { DataService } from './DataService';
 import * as Notifier from 'node-notifier'
+import { RequestService } from './RequestService';
 
 /*
 Simple Transaction:
@@ -33,23 +34,24 @@ const HaltRouteRequests: Array<string> = [
     'request-data'
 ]
 
+var dataId = 0;
+
 // Singleton
 export class SocketService {
     private static Instance: SocketService;
-    private static Socket: WebSocket.Server;
-
+    private Socket: WebSocket.Server;
     private constructor() { }
 
     static GetInstance() {
         if (this.Instance === undefined) {
             this.Instance = new SocketService();
-            this.Socket = new WebSocket.Server({port: 8112});
-            this.StartSocketService();
+            this.Instance.Socket = new WebSocket.Server({port: 8112});
+            this.Instance.StartSocketService();
         }
         return this.Instance;
     }
 
-    static StartSocketService() {
+    StartSocketService() {
         this.Socket.setMaxListeners(1);
 
         this.Socket.on('connection', (ws: any) => {
@@ -58,10 +60,10 @@ export class SocketService {
                 return;
             }
 
-            MainProcess.WindowSend('connection-status', true);
+            MainProcess.GetInstance().WindowSend('connection-status', true);
 
             ws.on('close', () => {
-                MainProcess.WindowSend('connection-status', false);
+                MainProcess.GetInstance().WindowSend('connection-status', false);
             });
 
             // Recieve transaction information.
@@ -69,7 +71,7 @@ export class SocketService {
         });
     }
 
-    private static HandleSocketMessage(ws, msg) {
+    private HandleSocketMessage(ws, msg) {
         // Parse Data
         var result: any;
 
@@ -89,14 +91,13 @@ export class SocketService {
             return;
         }
 
-        if (result.route == 'request-data') {
-            console.log('testabc')
-            
-            Notifier.notify({ title: 'Privient', message: `${result.data.appname} is requesting data.`});
-        }
+        // Increase data id for each transaction recieved.
+        dataId += 1;
+        result['id'] = dataId;
 
-        if (result.display !== undefined && result.display) {
-            MainProcess.WindowSend(result.route, result.data);
+        if (result.route == 'request-data') {
+            Notifier.notify({ title: 'Privient', message: `${result.data.appname} is requesting data.`});
+            RequestService.GetInstance().PushRequest(result);
         }
         
         if (HaltRouteRequests.includes(result.route)) {
@@ -105,7 +106,7 @@ export class SocketService {
 
         // Rest of cases go here:
         if (result.route === 'save-data') {
-            if (CryptoService.Status) {
+            if (CryptoService.GetInstance().Status) {
                 this.SaveData(result.data.appname, result.data);
             } else {
 
@@ -113,7 +114,7 @@ export class SocketService {
         }
     }
 
-    private static SaveData(appName: string, data: any) {
+    private SaveData(appName: string, data: any) {
         DataService.SetDataByAppName(appName, data);
     }
 }
