@@ -60,7 +60,6 @@ export class DataService {
             if(store.has('startup')) {
                 var dataToDecrypt = store.get('startup')
                 var res = CryptoService.GetInstance().Decrypt(password, dataToDecrypt);
-                console.log('Decrypted: ' + res);
                 if (res == undefined)
                     return reject('Failed to decrypt');
                 return resolve(res);

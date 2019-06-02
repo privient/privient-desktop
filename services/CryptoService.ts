@@ -2,19 +2,23 @@ import * as crypto from 'crypto';
 import * as sjcl from 'sjcl';
 import { MainProcess } from '../app';
 import { DataService } from './DataService';
+import { machineId, machineIdSync } from 'node-machine-id';
 
 export class CryptoService {
     public Status: boolean;
-    private static Instance: CryptoService;
-    private Session: string;
-    private SessionPassword: any;
+    static Instance: CryptoService;
+    private _Session: string;
+    private _SessionPassword: any;
 
     private constructor() { }
 
+    /**
+     * Kills the entire instance and locks the wallet.
+     */
     KillInstance() {
         this.Status = undefined;
-        this.Session = undefined;
-        this.SessionPassword = undefined;
+        this._Session = undefined;
+        this._SessionPassword = undefined;
         this.Status = false;
         MainProcess.GetInstance().WindowSend('lock-wallet', true);
     }
@@ -27,18 +31,15 @@ export class CryptoService {
     }
 
     SetupInstance(data) {
-        let password = data.password;
         // Create random bytes hash for session.
-        let randomBytes = JSON.stringify(crypto.randomBytes(Math.floor(Math.random() * 10000) + 1));
-        let hashedBytes = sjcl.hash.sha256.hash(randomBytes);
-        let hashPassword = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(password));
+        this._Session = crypto.randomBytes(512).toString('hex');
+        let hashPassword = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(data.password));
 
         DataService.FirstTimeSetupCheck(hashPassword).then(
             (res) => {
                 // Encrypted or New Encryption Successful
                 this.Status = true;
-                this.Session = sjcl.codec.hex.fromBits(hashedBytes);
-                this.SessionPassword = sjcl.encrypt(this.Session, hashPassword, {mode: 'gcm'});
+                this._SessionPassword = sjcl.encrypt(this._Session, hashPassword, {mode: 'gcm'});
                 MainProcess.GetInstance().WindowSend('lock-wallet', false);
             },
             (err) => {
@@ -66,7 +67,7 @@ export class CryptoService {
     // Decrypts by session key
     DecryptBySession(data: string) {
         try {
-            var pass = sjcl.decrypt(this.Session, this.SessionPassword);
+            let pass = sjcl.decrypt(JSON.stringify(this._Session), this._SessionPassword);
             return sjcl.decrypt(pass, data);
         } catch(err) {
             return undefined;
@@ -76,12 +77,10 @@ export class CryptoService {
     // Encrypts data by session key
     EncryptBySession(data: string) {
         try {
-            var pass = sjcl.decrypt(this.Session, this.SessionPassword);
-            var encryption = sjcl.encrypt(pass, data);
-            console.log(encryption);
+            let pass = sjcl.decrypt(JSON.stringify(this._Session), this._SessionPassword);
+            let encryption = sjcl.encrypt(pass, data);
             return encryption;
         } catch(err) {
-            console.log(err);
             return undefined;
         }
     }

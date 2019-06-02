@@ -34,6 +34,9 @@ export class AppComponent {
     
     es.ipcRenderer.on('connection-status', (event, arg) => { this.setConnectionState(event, arg); });
     es.ipcRenderer.on('lock-wallet', (event, arg) => { this.lockWallet(event, arg); });
+    es.ipcRenderer.on('route', (event, arg) => {
+      this.router.navigateByUrl(arg);
+    })
   }
 
   private setConnectionState(event: IpcMessageEvent, arg: any) {
