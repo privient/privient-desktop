@@ -1,7 +1,5 @@
 import { MainProcess } from '../app';
 
-
-
 export class RequestService {
     static Instance: RequestService;
     Requests: Array<any> = [];

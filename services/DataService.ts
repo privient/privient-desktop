@@ -1,6 +1,5 @@
 import * as Store from 'data-store';
 import { CryptoService } from './CryptoService';
-import { reject } from 'q';
 
 const store = new Store({ path: 'userdata.db '});
 
@@ -52,6 +51,7 @@ export class DataService {
 
     static SetDataByAppName(appName: string, data: any) {
         var encrypted = CryptoService.GetInstance().EncryptBySession(data);
+        console.log(encrypted);
         store.set(appName, encrypted);
     }
 

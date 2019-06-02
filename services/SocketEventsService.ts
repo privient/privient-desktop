@@ -5,7 +5,6 @@ import * as Notifier from 'node-notifier'
 import { SocketService } from './SocketService';
 import { CryptoService } from './CryptoService';
 
-import * as path from 'path';
 import { MainProcess } from '../app';
 
 // These are defined by the route they belong to.

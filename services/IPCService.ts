@@ -4,6 +4,7 @@ import { MainProcess } from '../app';
 import { SocketService } from './SocketService';
 import { RequestService } from './RequestService';
 import { DataService } from './DataService';
+import { machineId, machineIdSync } from 'node-machine-id';
 
 export namespace IPCService {
     export function StartIPCService() {
@@ -71,8 +72,8 @@ export namespace IPCService {
                         return;
                     }
                     
-                    console.log(result);
-                    SocketService.GetInstance().SendSocketMessage({ route: 'use-data', data: result });
+                    let reencrypt = CryptoService.GetInstance().Encrypt(machineIdSync(), JSON.stringify(result.data));
+                    SocketService.GetInstance().SendSocketMessage({ route: 'use-data', data: reencrypt });
                 },
                 (error) => {
                     console.log(error);

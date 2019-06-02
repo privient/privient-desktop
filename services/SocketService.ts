@@ -1,9 +1,7 @@
 import * as WebSocket from 'ws';
 import { MainProcess } from '../app';
-import { CryptoService } from './CryptoService';
-import { DataService } from './DataService';
-import { RequestService } from './RequestService';
 import { SocketEventsService } from './SocketEventsService';
+import { machineId, machineIdSync } from 'node-machine-id';
 
 /*
 Simple Transaction:
@@ -55,6 +53,9 @@ export class SocketService {
         this.Socket.setMaxListeners(1);
         this.Socket.on('connection', (ws: any) => {
             MainProcess.GetInstance().WindowSend('connection-status', true);
+            
+            ws.send(JSON.stringify({ route: "machine", data: machineIdSync() }));
+            
 
             ws.on('close', () => {
                 MainProcess.GetInstance().WindowSend('connection-status', false);

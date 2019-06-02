@@ -2,7 +2,6 @@ import * as crypto from 'crypto';
 import * as sjcl from 'sjcl';
 import { MainProcess } from '../app';
 import { DataService } from './DataService';
-import { machineId, machineIdSync } from 'node-machine-id';
 
 export class CryptoService {
     public Status: boolean;
@@ -67,7 +66,7 @@ export class CryptoService {
     // Decrypts by session key
     DecryptBySession(data: string) {
         try {
-            let pass = sjcl.decrypt(JSON.stringify(this._Session), this._SessionPassword);
+            let pass = sjcl.decrypt(this._Session, this._SessionPassword);
             return sjcl.decrypt(pass, data);
         } catch(err) {
             return undefined;
@@ -77,7 +76,7 @@ export class CryptoService {
     // Encrypts data by session key
     EncryptBySession(data: string) {
         try {
-            let pass = sjcl.decrypt(JSON.stringify(this._Session), this._SessionPassword);
+            let pass = sjcl.decrypt(this._Session, this._SessionPassword);
             let encryption = sjcl.encrypt(pass, data);
             return encryption;
         } catch(err) {
