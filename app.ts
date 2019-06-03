@@ -3,7 +3,6 @@ import { SocketService } from './services/SocketService';
 import { CryptoService } from './services/CryptoService';
 import * as path from 'path';
 import * as url from 'url';
-import { DataService } from './services/DataService';
 import { IPCService } from './services/IPCService';
 
 const defaultPage = url.format({

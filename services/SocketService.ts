@@ -1,12 +1,15 @@
 import * as WebSocket from 'ws';
 import { MainProcess } from '../app';
 import { SocketEventsService } from './SocketEventsService';
-import { machineId, machineIdSync } from 'node-machine-id';
+import { CryptoService } from './CryptoService';
 
 /*
 Simple Transaction:
+// Private key example: 5Ht8zLrLkgXZMzHv9DDLGd5sPKWcKeLsXpUumo6fziUHGC2MuNR
+
 {
   "route": "request-data",
+  "publickey": "EOS7dd7miduLBniTp7poqGMAVn8QjYhQBor3jV6S1zWedSpUEDhAc",
   "display": true,
   "data": {
     "appname": "xyz"
@@ -52,10 +55,14 @@ export class SocketService {
     StartSocketService() {
         this.Socket.setMaxListeners(1);
         this.Socket.on('connection', (ws: any) => {
+            if (!CryptoService.GetInstance().Status) {
+                MainProcess.GetInstance().WindowSend('wallet-status', false);
+                ws.close();
+                return;
+            }
+
             MainProcess.GetInstance().WindowSend('connection-status', true);
-            
-            ws.send(JSON.stringify({ route: "machine", data: machineIdSync() }));
-            
+            ws.send(JSON.stringify({ route: 'publickey', data: `${CryptoService.GetInstance().PublicKey}`}))
 
             ws.on('close', () => {
                 MainProcess.GetInstance().WindowSend('connection-status', false);

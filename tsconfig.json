@@ -1,15 +1,13 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "./dist",
     "sourceMap": false,
     "declaration": false,
-    "module": "commonjs",
+    "outDir": "./dist",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es5",
     "typeRoots": [
       "node_modules/@types"
     ],

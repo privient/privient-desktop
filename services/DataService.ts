@@ -1,5 +1,6 @@
 import * as Store from 'data-store';
 import { CryptoService } from './CryptoService';
+import * as ecc from 'eosjs-ecc'
 
 const store = new Store({ path: 'userdata.db '});
 
@@ -51,7 +52,6 @@ export class DataService {
 
     static SetDataByAppName(appName: string, data: any) {
         var encrypted = CryptoService.GetInstance().EncryptBySession(data);
-        console.log(encrypted);
         store.set(appName, encrypted);
     }
 
@@ -65,9 +65,11 @@ export class DataService {
                 return resolve(res);
             }
 
-            var encRes = CryptoService.GetInstance().Encrypt(password, JSON.stringify({ data: 'startup'}));
-            store.set('startup', encRes);
-            return resolve(encRes);
+            ecc.randomKey().then((privatekey) => {
+                var encRes = CryptoService.GetInstance().Encrypt(password, JSON.stringify({ private: privatekey, public: ecc.privateToPublic(privatekey) }));
+                store.set('startup', encRes);
+                return resolve(encRes);
+            });
         })
     }
 } 
