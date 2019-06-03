@@ -1,7 +1,10 @@
-<ul>
+<ul class="data-request-list">
     <li *ngFor="let request of requests">
-        <p>{{ request }}</p>
-        <button (click)="DataRequestAction($event, request, true)">Accept</button>
-        <button (click)="DataRequestAction($event, request, false)">Decline</button>
+        <div class="col-8">
+            <span class="data-app-info">{{ request.data.appname }}</span>
+        </div>
+        <div class="col-1-2">
+            <button (click)="DataRequestAction($event, request, true)">Accept</button><button (click)="DataRequestAction($event, request, false)">Decline</button>
+        </div>
     </li>
 </ul>

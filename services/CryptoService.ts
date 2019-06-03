@@ -43,7 +43,7 @@ export class CryptoService {
             (res) => {
                 // Encrypted or New Encryption Successful
                 let keys = res as any;
-                this.PublicKey = keys.public as string;
+                this.PublicKey = JSON.parse(keys).public;
                 this.Status = true;
                 this._SessionPassword = sjcl.encrypt(this._Session, hashPassword, {mode: 'gcm'});
                 this._SessionKeys = sjcl.encrypt(this._Session, keys, {mode: 'gcm'});

@@ -117,7 +117,7 @@ body, html
 .menu li button:hover
   color: $acc-main
   cursor: pointer
-  box-shadow: inset 30em 0 0 0.01px rgba(255, 255, 255, 0.2)
+  box-shadow: inset 0.5em 0 0 0.01px $acc-main
   -webkit-animation: glow 1s ease-in-out infinite alternate
   
 .menu li button:focus
@@ -132,5 +132,43 @@ body, html
     text-shadow: 0 0 15px $acc-main-off
 
 .connection-status
-    padding-left: 3vh
-    color: white
+  padding-left: 3vh
+  color: white
+  font-family: 'Lato'
+  font-size: 11px
+    
+.data-request-list
+  list-style-type: none
+  padding: 0
+  margin: 0
+
+.data-request-list li
+  font-family: 'Lato'
+  display: flex
+  transition: 1s
+
+.data-request-list li:hover
+  background-color: rgba(0, 0, 0, 0.1)
+  
+.data-request-list button
+  padding: 2em
+  background: transparent
+  color: #FFFFFF
+  -webkit-user-select: none
+  transition: 1s
+  border: none
+  font-family: 'Lato'
+  
+.data-request-list button:hover
+  color: #FFFFFF
+  cursor: pointer
+  box-shadow: inset 0 0.5em 0 0.001px $acc-main
+  
+.data-app-info
+  padding: 2em
+  text-align: left
+  text-decoration: none
+  font-family: 'Lato'
+  font-size: 13px
+  color: white
+  display: flex
